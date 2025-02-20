@@ -1,6 +1,6 @@
 import unittest
 import os
-
+import csv
 
 def load_csv(f):
     '''
@@ -11,13 +11,26 @@ def load_csv(f):
         nested dict structure from csv
         outer keys are (str) years, values are dicts
         inner keys are (str) months, values are (str) integers
-    
-    Note: Don't strip or otherwise modify strings. Don't change datatypes from strings. 
     '''
-
     base_path = os.path.abspath(os.path.dirname(__file__))
     full_path = os.path.join(base_path, f)
-    # use this 'full_path' variable as the file that you open
+    
+    data = {}
+    
+    with open(full_path, mode='r') as file:
+        reader = csv.DictReader(file)
+        
+        for row in reader:
+            year = row['Year']
+            month = row['Month']
+            visitors = row['Visitors']
+            
+            if year not in data:
+                data[year] = {}
+                
+            data[year][month] = visitors
+            
+    return data
 
 def get_annual_max(d):
     '''
@@ -27,11 +40,22 @@ def get_annual_max(d):
     Returns:
         list of tuples, each with 3 items: year (str), month (str), and max (int) 
         max is the maximum value for a month in that year, month is the corresponding month
-
-    Note: Don't strip or otherwise modify strings. Do not change datatypes except where necessary.
-        You'll have to change vals to int to compare them. 
     '''
-    pass
+    annual_max = []
+    
+    for year, months in d.items():
+        max_visitors = -1
+        max_month = None
+        
+        for month, visitors in months.items():
+            visitors_count = int(visitors)
+            if visitors_count > max_visitors:
+                max_visitors = visitors_count
+                max_month = month
+                
+        annual_max.append((year, max_month, max_visitors))
+    
+    return annual_max
 
 def get_month_avg(d):
     '''
@@ -41,11 +65,20 @@ def get_month_avg(d):
     Returns:
         dict where keys are years and vals are floats rounded to nearest whole num or int
         vals are the average vals for months in the year
-
-    Note: Don't strip or otherwise modify strings. Do not change datatypes except where necessary. 
-        You'll have to make the vals int or float here and round the avg to pass tests.
     '''
-    pass
+    month_avg = {}
+    
+    for year, months in d.items():
+        total_visitors = 0
+        month_count = len(months)
+        
+        for visitors in months.values():
+            total_visitors += int(visitors)
+        
+        avg_visitors = total_visitors / month_count
+        month_avg[year] = round(avg_visitors)
+    
+    return month_avg
 
 class dis7_test(unittest.TestCase):
     '''
